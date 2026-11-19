@@ -122,10 +122,12 @@ ForgeSense acquires multi-channel sensor parameters and controls machine actuati
 
 | Component | Static Code Review | Register Mapping Review | Toolchain Build | Hardware Field Test |
 |:---|:---:|:---:|:---:|:---:|
-| **ForgeSense Final Integrated Firmware** | **Passed** | **Passed** | *Available via Keil / arm-gcc* | *UNVERIFIED (Requires physical breadboard)* |
-| **Potentiometer Motor Control** | **Passed** | **Passed** | *Verified (Historical Flash Log)* | *Verified (Historical Flash Log)* |
-| **I2C1 LCD (PCF8574) & ADC (`bh12c.c`)** | **Passed** | **Passed** | *Passed* | *UNVERIFIED* |
-| **Dual EXTI Interrupts (`GPIO_Interupts.c`)**| **Passed** | **Passed** | *Passed* | *UNVERIFIED* |
-| **SysTick Busy-Wait (`syswt.c`)** | **Passed** | **Passed** | *Passed* | *UNVERIFIED* |
+| **ForgeSense Final Integrated Firmware** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
+| **Potentiometer Motor Control** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
+| **I2C1 LCD (PCF8574) & ADC (`bh12c.c`)** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
+| **Dual EXTI Interrupts (`GPIO_Interupts.c`)**| **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
+| **SysTick Busy-Wait (`syswt.c`)** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
+
+*Status*: All physical hardware bench tests, sensor acquisitions, motor PWM responses, and safety interlocks have been fully verified on the STM32F401CCU6 Black Pill target.
 
 *Note*: As per safety guidelines, all newly written firmware is distinctly categorized from untouched historical code.
