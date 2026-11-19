@@ -1,133 +1,96 @@
-# Embedded Systems STM32: Coursework Analysis, Code Audit & Firmware Architecture
+# ForgeSense: STM32 Machine Monitoring & Control System
 
-[![Target: STM32F401CCU6](https://img.shields.io/badge/MCU-STM32F401CCU6-blue.svg)](https://www.st.com/en/microcontrollers-microprocessors/stm32f401cc.html)
-[![Core: ARM Cortex-M4](https://img.shields.io/badge/Core-ARM%20Cortex--M4%20with%20FPU-orange.svg)](https://developer.arm.com/Processors/Cortex-M4)
-[![Language: Embedded C](https://img.shields.io/badge/Language-Embedded%20C%20(Bare--metal)-green.svg)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+[![Target: STM32F401CCU6](https://img.shields.io/badge/MCU-STM32F401CCU6%20(Black%20Pill)-blue.svg)](https://www.st.com/en/microcontrollers-microprocessors/stm32f401cc.html)
+[![Language: Embedded C](https://img.shields.io/badge/Firmware-Bare--Metal%20C%20(CMSIS)-green.svg)]()
+[![Web Console: Web Serial API](https://img.shields.io/badge/Console-Web%20Serial%20API%20(HTML5)-orange.svg)]()
 
-A rigorous, professional, bare-metal Embedded C repository documenting, auditing, correcting, and validating the complete Embedded Systems coursework, laboratory practicals, and the flagship **ForgeSense** industrial machine monitoring project built on the **STM32F401CCU6** ("Black Pill") development platform.
+ForgeSense is a tabletop intelligent machine condition monitoring and motor drive supervisory platform developed on the **STM32F401CCU6 (Black Pill)** microcontroller. It integrates analog sensing, closed-loop PWM motor control, an I2C OLED display, an active-LOW buzzer, a hardware emergency-stop interlock, and real-time live telemetry streaming to a Web dashboard over UART/Wi-Fi.
 
----
-
-## 1. Primary Objectives & Methodology
-* **Bare-Metal Register Programming**: Direct peripheral manipulation via CMSIS device headers (`stm32f4xx.h`) without relying on abstraction layers (no HAL/LL libraries).
-* **Historical Code Preservation**: Original source files preserved in `historical-source/original/` and audited without destructive overwrites.
-* **Rigorous Defect Audit**: Technical root-cause identification across EXTI pending bit handling, ADC polling traps, pin allocation conflicts, and timer PWM calculations.
-* **Reconciled Systems Engineering**: Elimination of hardware resource contentions (e.g. USART1 vs L298N pin collisions) and delivery of verified reference firmware.
+![ForgeSense Architecture Diagram](hardware/ForgeSense_Architecture_Diagram.jpg)
 
 ---
 
-## 2. Hardware Architecture & Development Tools
-- **Microcontroller**: STM32F401CCU6 (ARM Cortex-M4 @ 16 MHz HSI / up to 84 MHz PLL)
-- **Development Board**: WeAct Black Pill
-- **Toolchains**: Keil MDK / µVision, ARM GNU Toolchain (`arm-none-eabi-gcc`), OpenOCD / ST-Link V2
-- **Key Hardware Modules**:
-  - L298N Dual H-Bridge Motor Driver with DC Geared Motor
-  - SSD1306 0.96" I2C OLED Display (`0x3C`)
-  - PCF8574 16x2 Character LCD Backpack (`0x4E`)
-  - MPU6050 6-DOF I2C Accelerometer / Gyroscope (`0x68`)
-  - ESP8266 ESP-01 Serial Wi-Fi Transceiver (9600 Baud Telemetry)
-  - LM35 Precision Centigrade Temperature Sensor ($10\text{ mV/}^\circ\text{C}$)
-  - ACS712-05A Hall-Effect Linear Current Sensor
-  - Resistor Voltage Divider for Battery / Supply Monitoring
-  - Active-LOW Piezo Buzzer & 5x External Status LEDs
-
----
-
-## 3. Repository Directory Structure
+## 1. Project Directory Structure
 
 ```text
-Embedded-Systems-STM32/
-├── README.md                           # Master Project Documentation & Index
-├── LICENSE                             # MIT Open Source License
-├── CONTRIBUTING.md                      # Code Style & Contribution Guidelines
-├── CHANGELOG.md                        # Version & Defect Correction History
-│
-├── 00_Introduction/                    # MCU Overview & Toolchain Setup
-│   └── STM32F401CCU6_Introduction.md
-│
-├── 01_ARM_Cortex_M4/                   # Cortex-M4 Architecture & Core Theory
-│   ├── Architecture.md                 # Harvard Bus, Registers, Dual Stack, NVIC
-│   └── 3b. ARM architecture_part2.pptx  # Preserved Lecture Material
-│
-├── 02_GPIO/                            # General Purpose I/O Theory & Practicals
-├── 03_ADC/                             # Analog-to-Digital Converter Engineering
-├── 04_Communication/                   # USART & I2C Master Implementations
-├── 05_Interrupts/                      # EXTI External Lines & NVIC Configuration
-├── 06_SysTick_Timer/                   # Core SysTick Delay & Interval Generation
-├── 07_PWM/                             # TIM3 PWM Generation & H-Bridge Control
-├── 08_Display_Interfacing/             # I2C OLED (SSD1306) & LCD (PCF8574)
-├── 09_Sensor_Interfacing/              # LM35, ACS712, Voltage Divider, MPU6050
-│
-├── 10_Projects/                        # Coursework Applications
-│   ├── ForgeSense/                     # Flagship Machine Condition Monitor
-│   │   ├── README.md
-│   │   ├── hardware/                   # Circuit & Pin Interconnect Specs
-│   │   ├── firmware/
-│   │   │   ├── original/               # Historical motor control implementation
-│   │   │   ├── modified/               # Version with MPU6050 vibration logic
-│   │   │   ├── corrected/              # Audited motor control program
-│   │   │   └── final/                  # Final production integrated firmware
-│   │   └── documentation/              # Original Case Study Report PDF
-│   ├── Railway_Crossing/               # Curriculum Placeholder
-│   ├── Smart_Water_Level/              # Curriculum Placeholder
-│   └── Smart_Security_Light/           # Curriculum Placeholder
-│
-├── 11_Lab_Exercises/                   # Complete Practical Laboratory Catalog
-│   └── README.md
-│
-├── 12_Debugging/                       # Embedded C Traps & Register Debugging
-│   └── Common_Errors.md
-│
-├── 13_Reference_Tables/                # Hardware Pin & Register Mapping
-│   ├── GPIO_Pin_Mapping.md
-│   └── Register_Bit_Positions.md
-│
-├── 14_Circuit_Diagrams/                # Schematic Diagrams & Photos
-│   └── ForgeSense/
-│       └── ForgeSense_Architecture_Diagram.jpg
-│
-├── 15_Datasheets/                      # Official ST Reference Manuals
-│   └── STM32F401/
-│       └── RM0368_STM32F401_Reference_Manual.pdf
-│
-├── 16_Audit_Reports/                   # Technical Defect & Validation Reports
-│   ├── Code_Audit.md                   # Source-level bug breakdown
-│   ├── Hardware_Audit.md               # Hardware pin contention analysis
-│   ├── Integration_Audit.md            # Module dependency & safety interlock
-│   └── Validation_Report.md            # Verification status matrix
-│
-└── historical-source/                  # Strict Code Preservation Archive
-    ├── original/                       # Untouched historical C source files
-    ├── modified/                       # Intermediate student iterations
-    └── attachments/                    # Raw incoming media & PDFs
+Embedded-systems-project/
+├── firmware/
+│   ├── main.c              # Full integrated Keil firmware (Sensors, OLED, Motor PWM, E-Stop, USART2)
+│   └── motor_control.c     # Standalone potentiometer motor speed driver
+├── web/
+│   └── index.html          # Live Web Serial UART Telemetry Dashboard (Open in Chrome/Edge)
+├── esp8266/
+│   └── esp8266_wifi.ino    # Optional ESP8266 Wi-Fi serial bridge firmware
+├── hardware/
+│   ├── ForgeSense_Architecture_Diagram.jpg   # Circuit connection diagram
+│   └── WIRING.md           # Pin connections and electrical wiring guide
+└── README.md               # Quickstart: Build, flash, connect, and run
 ```
 
 ---
 
-## 4. Primary Project: ForgeSense Architecture
+## 2. Hardware Wiring Quick Reference
 
-ForgeSense acquires multi-channel sensor parameters and controls machine actuation with an autonomous high-priority safety interlock:
+| Sensor / Module | Signal | STM32 Pin | Function |
+|:---|:---|:---:|:---|
+| **Speed Potentiometer** | Wiper | `PA0` | `ADC1_IN0` (0–3.3V analog speed setpoint) |
+| **LM35 Temperature** | OUT | `PA1` | `ADC1_IN1` (10 mV/°C analog temperature) |
+| **Battery Divider** | Scaled OUT | `PA4` | `ADC1_IN4` (1:2 voltage divider) |
+| **ACS712 Current** | OUT | `PA5` | `ADC1_IN5` (Motor current sensor) |
+| **L298N Motor Driver** | ENA / ENB | `PA6` | `TIM3_CH1` PWM (1 kHz motor speed control) |
+| **L298N Motor Driver** | IN3 | `PA8` | Motor direction 1 |
+| **L298N Motor Driver** | IN4 | `PA9` | Motor direction 2 |
+| **UART Telemetry (USB/ESP)**| RX | `PA2` | `USART2_TX` (9600 Baud, 8-N-1) |
+| **UART Telemetry (USB/ESP)**| TX | `PA3` | `USART2_RX` |
+| **SSD1306 OLED (0x3C)** | SCL, SDA | `PB6`, `PB7` | `I2C1` (100 kHz standard mode) |
+| **MPU6050 IMU (0x68)** | SCL, SDA | `PB6`, `PB7` | `I2C1` (Shared with OLED) |
+| **Active-LOW Buzzer** | Signal | `PB9` | 3.3V = Silent, 0V = Sounding |
+| **Status LEDs (Red/Green/Yellow)**| Anodes | `PB0`, `PB1`, `PB2` | 220 Ω resistors to ground |
+| **Emergency Stop Button**| Contact | `PB12` | Active-LOW (Internal pull-up enabled) |
+| **Operator Button** | Contact | `PB5` | Active-LOW (Internal pull-up enabled) |
+| **Onboard User LED** | Onboard | `PC13` | Active-LOW (5 Hz emergency blink) |
 
-![ForgeSense Architecture Diagram](14_Circuit_Diagrams/ForgeSense/ForgeSense_Architecture_Diagram.jpg)
-
-### Key Hardware Reconciliations:
-1. **USART2 Migration**: Migrated Wi-Fi telemetry from `PA9`/`PA10` (USART1) to `PA2`/`PA3` (USART2) to resolve a direct physical pin collision with the L298N motor direction input on `PA9`.
-2. **Current Sensor Mapping**: Moved ACS712 analog input to `PA5` (`ADC1_IN5`), freeing `PA2` for `USART2_TX`.
-3. **Emergency Stop Interlock**: Dedicated active-LOW switch on `PB12` triggering immediate PWM zeroing, motor de-energization, buzzer silencing, display zeroing, and a latching 5 Hz lockout blink on `PC13` and `PB0`.
+> See [hardware/WIRING.md](hardware/WIRING.md) for complete electrical specifications and power supply rules.
 
 ---
 
-## 5. Technical Validation Summary
+## 3. How to Build & Flash with Keil MDK
 
-| Component | Static Code Review | Register Mapping Review | Toolchain Build | Hardware Field Test |
-|:---|:---:|:---:|:---:|:---:|
-| **ForgeSense Final Integrated Firmware** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
-| **Potentiometer Motor Control** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
-| **I2C1 LCD (PCF8574) & ADC (`bh12c.c`)** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
-| **Dual EXTI Interrupts (`GPIO_Interupts.c`)**| **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
-| **SysTick Busy-Wait (`syswt.c`)** | **Passed** | **Passed** | **Passed** | **Hardware Testing Successful (Passed)** |
+1. **Open Keil MDK (µVision)**:
+   - Create a new project or open your existing project targeting **STM32F401CCUx**.
+2. **Add Files**:
+   - Add `firmware/main.c` to your project source group.
+   - Include CMSIS device headers (`stm32f4xx.h`).
+3. **Configure Target Options (`Alt + F7`)**:
+   - **Target**: Set IROM1: `0x08000000`, IRAM1: `0x20000000`.
+   - **C/C++**: Preprocessor defines: `STM32F401xC`.
+   - **Debug**: Select **ST-Link Debugger** (or CMSIS-DAP). Under *Settings* -> *Flash Download*, ensure **Reset and Run** is checked.
+4. **Compile & Download**:
+   - Click **Build (`F7`)**. Verify 0 errors, 0 warnings.
+   - Click **Download (`F8`)** to flash the code to the STM32 via ST-Link.
 
-*Status*: All physical hardware bench tests, sensor acquisitions, motor PWM responses, and safety interlocks have been fully verified on the STM32F401CCU6 Black Pill target.
+---
 
-*Note*: As per safety guidelines, all newly written firmware is distinctly categorized from untouched historical code.
+## 4. How to Run the UART Web Dashboard
+
+1. **Connect Hardware**:
+   - Connect STM32 `PA2` (`USART2_TX`) to the `RX` pin of a USB-to-UART converter (CP2102 / FTDI / CH340).
+   - Connect `GND` of the USB-UART converter to STM32 `GND`.
+   - Plug the USB-UART converter into your PC.
+2. **Open Dashboard**:
+   - Double-click [`web/index.html`](web/index.html) to open it in **Google Chrome** or **Microsoft Edge**.
+3. **Connect**:
+   - Click **"Connect Serial Port"**.
+   - Select your USB-UART adapter COM port from the browser prompt.
+   - The dashboard will immediately start streaming live gauges for Potentiometer, Motor Speed (%), PWM Duty, Direction, Temperature, Battery Voltage, Current, and Emergency Stop Status!
+
+---
+
+## 5. Emergency Stop Interlock Behavior
+
+When the emergency stop button on `PB12` is pressed:
+- **Motor**: Instantly stops (`TIM3->CCR1 = 0`, direction pins de-energized).
+- **Buzzer**: Silenced immediately (`PB9` driven HIGH).
+- **Display**: All live readings are zeroed on the OLED screen.
+- **Safety Lockout**: The system enters an irreversible 5 Hz lockout blink on `PC13` and `PB0` (Red LED).
+- **Web Console**: The status banner turns red and displays `E-STOP: LATCHED`.
